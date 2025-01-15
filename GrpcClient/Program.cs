@@ -7,7 +7,7 @@ var messageClient = new Message.MessageClient(channel);
 #region Unary Method
 //MessageResponse responseUnary = await messageClient.UnaryCallAsync(new()
 //{
-//    Name = "Mevlüt",
+//    Name = "Client",
 //    Message = "Unary Method.."
 //});
 //Console.WriteLine(responseUnary.Message);
@@ -16,7 +16,7 @@ var messageClient = new Message.MessageClient(channel);
 #region Server Streaming Method
 //var response = messageClient.StreamingFromServer(new()
 //{
-//    Name = "Mevlüt",
+//    Name = "Client",
 //    Message = "Server Streaming Method.."
 //});
 
@@ -26,6 +26,24 @@ var messageClient = new Message.MessageClient(channel);
 //{
 //    Console.WriteLine(response.ResponseStream.Current.Message);
 //}
+#endregion
+
+#region Client Streaming Method
+var request = messageClient.StreamingFromClient();
+
+for (int i = 0; i < 10; i++)
+{
+    await Task.Delay(200);
+    await request.RequestStream.WriteAsync(new()
+    {
+        Name = "Client",
+        Message = "Client Streaming Method " + i
+    });
+}
+await request.RequestStream.CompleteAsync();
+
+MessageResponse response = await request.ResponseAsync;
+Console.WriteLine(response.Message);
 #endregion
 
 Console.Read();

@@ -10,6 +10,9 @@ service Message {
 
   // Server Streaming Method
   rpc StreamingFromServer (MessageRequest) returns (stream MessageResponse);
+
+  // Client Streaming Method
+  rpc StreamingFromClient (stream MessageRequest) returns (MessageResponse);
 }
 
 message MessageRequest {

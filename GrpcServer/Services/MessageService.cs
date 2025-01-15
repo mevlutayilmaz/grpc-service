@@ -24,8 +24,18 @@ namespace GrpcServer.Services
             for (int i = 0; i < 10; i++)
             {
                 await Task.Delay(200);
-                await responseStream.WriteAsync(new() { Message = "Hello" + i });
+                await responseStream.WriteAsync(new() { Message = "Hello " + i });
             }
+        }
+
+        public override async Task<MessageResponse> StreamingFromClient(IAsyncStreamReader<MessageRequest> requestStream, ServerCallContext context)
+        {
+            while (await requestStream.MoveNext(context.CancellationToken))
+            {
+                Console.WriteLine($"Message: {requestStream.Current.Message} | Name: {requestStream.Current.Name}");
+            }
+
+            return new() { Message = "Message received successfully.." };
         }
     }
 }
