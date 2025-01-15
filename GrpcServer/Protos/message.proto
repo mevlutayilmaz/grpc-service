@@ -13,6 +13,9 @@ service Message {
 
   // Client Streaming Method
   rpc StreamingFromClient (stream MessageRequest) returns (MessageResponse);
+
+  // Bi-directional Streaming Method
+  rpc StreamingBothWays (stream MessageRequest) returns (stream MessageResponse);
 }
 
 message MessageRequest {

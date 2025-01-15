@@ -23,8 +23,8 @@ namespace GrpcServer.Services
 
             for (int i = 0; i < 10; i++)
             {
-                await Task.Delay(200);
-                await responseStream.WriteAsync(new() { Message = "Hello " + i });
+                await Task.Delay(1000);
+                await responseStream.WriteAsync(new() { Message = "Response Message " + i });
             }
         }
 
@@ -36,6 +36,25 @@ namespace GrpcServer.Services
             }
 
             return new() { Message = "Message received successfully.." };
+        }
+
+        public override async Task StreamingBothWays(IAsyncStreamReader<MessageRequest> requestStream, IServerStreamWriter<MessageResponse> responseStream, ServerCallContext context)
+        {
+            Task task = Task.Run(async () =>
+            {
+                while (await requestStream.MoveNext(context.CancellationToken))
+                {
+                    Console.WriteLine($"Message: {requestStream.Current.Message} | Name: {requestStream.Current.Name}");
+                }
+            });
+
+            for (int i = 0; i < 10; i++)
+            {
+                await Task.Delay(1000);
+                await responseStream.WriteAsync(new() { Message = "Response Message " + i });
+            }
+
+            await task;
         }
     }
 }

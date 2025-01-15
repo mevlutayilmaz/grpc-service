@@ -1,4 +1,5 @@
-﻿using Grpc.Net.Client;
+﻿using Grpc.Core;
+using Grpc.Net.Client;
 using GrpcClient;
 
 GrpcChannel channel = GrpcChannel.ForAddress("https://localhost:7219");
@@ -20,7 +21,7 @@ var messageClient = new Message.MessageClient(channel);
 //    Message = "Server Streaming Method.."
 //});
 
-//CancellationTokenSource cts = new CancellationTokenSource();
+//CancellationTokenSource cts = new();
 
 //while (await response.ResponseStream.MoveNext(cts.Token))
 //{
@@ -29,21 +30,48 @@ var messageClient = new Message.MessageClient(channel);
 #endregion
 
 #region Client Streaming Method
-var request = messageClient.StreamingFromClient();
+//var request = messageClient.StreamingFromClient();
 
-for (int i = 0; i < 10; i++)
+//for (int i = 0; i < 10; i++)
+//{
+//    await Task.Delay(1000);
+//    await request.RequestStream.WriteAsync(new()
+//    {
+//        Name = "Client",
+//        Message = "Client Streaming Method " + i
+//    });
+//}
+//await request.RequestStream.CompleteAsync();
+
+//MessageResponse response = await request.ResponseAsync;
+//Console.WriteLine(response.Message);
+#endregion
+
+#region Bi-directional Streaming Method
+var request = messageClient.StreamingBothWays();
+
+Task task = Task.Run(async () =>
 {
-    await Task.Delay(200);
-    await request.RequestStream.WriteAsync(new()
+    for (int i = 0; i < 10; i++)
     {
-        Name = "Client",
-        Message = "Client Streaming Method " + i
-    });
-}
-await request.RequestStream.CompleteAsync();
+        await Task.Delay(1000);
+        await request.RequestStream.WriteAsync(new()
+        {
+            Name = "Client",
+            Message = "Bi-directional Streaming Method " + i
+        });
+    }
 
-MessageResponse response = await request.ResponseAsync;
-Console.WriteLine(response.Message);
+    await request.RequestStream.CompleteAsync();
+});
+
+CancellationTokenSource cts = new();
+while (await request.ResponseStream.MoveNext(cts.Token))
+{
+    Console.WriteLine(request.ResponseStream.Current.Message);
+}
+
+await task;
 #endregion
 
 Console.Read();
