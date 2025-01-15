@@ -16,5 +16,16 @@ namespace GrpcServer.Services
             MessageResponse response = new() { Message = "Message received successfully.." };
             return Task.FromResult(response);
         }
+
+        public override async Task StreamingFromServer(MessageRequest request, IServerStreamWriter<MessageResponse> responseStream, ServerCallContext context)
+        {
+            Console.WriteLine($"Message: {request.Message} | Name: {request.Name}");
+
+            for (int i = 0; i < 10; i++)
+            {
+                await Task.Delay(200);
+                await responseStream.WriteAsync(new() { Message = "Hello" + i });
+            }
+        }
     }
 }

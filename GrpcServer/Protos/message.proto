@@ -7,6 +7,9 @@ package message;
 service Message {
   // Unary Method
   rpc UnaryCall (MessageRequest) returns (MessageResponse);
+
+  // Server Streaming Method
+  rpc StreamingFromServer (MessageRequest) returns (stream MessageResponse);
 }
 
 message MessageRequest {
